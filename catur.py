@@ -136,7 +136,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([1,2,3,4,5])
+                        waktu = random.choice ([1,2,3,4])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'rapid':
