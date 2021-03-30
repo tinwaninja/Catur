@@ -18,7 +18,7 @@ pip install -r requirements.txt
 To use this script you will need a browser [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new/).
 ## Setting up
 1. Create an account
-- Create an account on chess.com, by registering mode **beginner**.
+Create an account on chess.com, by registering mode **beginner**.
 It is recommended to create a username with 5 words and 2 numbers, for example: abcde11
 Confirm registration email.
 2. Enter Credentials
