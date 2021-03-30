@@ -10,7 +10,7 @@ To check that Python has been successfully installed, open CMD and type "python"
 Install [Git](https://git-scm.com/download/win) in Windows, then run the command below:
 ```
 cd C:\Users\USERNAMEWINDOWS\Desktop
-git clone git@github.com:tinwaninja/Catur.git
+git clone https://github.com/tinwaninja/Catur.git
 cd Catur
 pip install -r requirements.txt
 ```
