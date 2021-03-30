@@ -117,7 +117,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([0.05,0.10,1.00])
+                        waktu = random.choice ([0.05,0.10,0.50])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'blitz':
