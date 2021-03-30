@@ -15,7 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 otomatis_main = True
 #blitz untuk mengatur kecepatan langkah, True untuk permainan kilat (blitz), False untuk langkah 1-3 detik
-blitz = True
+blitz = False
 
 #lokasi file
 lokasi_file = os.path.abspath(__file__)
@@ -117,7 +117,8 @@ def main_game(driver, engine, otomatis_main, depth):
             print(end_time-start_time)
             warna_kotak(driver, terbaik)
             if blitz != True:
-                time.sleep(random.randint(1,3))
+                #time.sleep(random.randint(1,3))
+                time.sleep( random.choice ([0.05, 1.05, 1.50, 1.00]) )
             gerakan_otomatis(driver)
     except:
         return
