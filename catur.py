@@ -96,16 +96,6 @@ def cari_terbaik(engine, notasi, depth):
 #main game
 def main_game(driver, engine, otomatis_main, depth, warna):
     global mode
-    if otomatis_main:
-        try:
-            time.sleep(1)
-            permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
-        except:
-            time.sleep(1)
-            driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
-            driver.find_element_by_class_name("quick-challenge-play").click()
-        else:
-            print("Menunggu pertandingan dimulai")
     notasi = buat_notasi()
     time.sleep(1)
     try:
@@ -154,9 +144,23 @@ def main_game(driver, engine, otomatis_main, depth, warna):
         return
 
 #cari warna
-def cari_warna(driver):
+def cari_warna(driver, otomatis_main):
     while (1):
         try:
+            if otomatis_main:
+                try:
+                    sudah = driver.find_element_by_class_name("game-over-button-button").click()
+                    print("Menunggu lawan")
+                except:
+                    try:
+                        time.sleep(5)
+                        permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
+                    except:
+                        time.sleep(1)
+                        driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
+                        driver.find_element_by_class_name("quick-challenge-play").click()
+                    else:
+                        print("Menunggu pertandingan dimulai")
             element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
@@ -243,11 +247,14 @@ def main():
     main_lagi = 1
     depth, otomatis_main = buka_pengaturan()
     while main_lagi:
-        warna = cari_warna(driver)
+        warna = cari_warna(driver, otomatis_main)
         main_game(driver, engine, otomatis_main, depth, warna)
-        masukan = input("Ketik 'start' untuk lanjut suggest (ketika pertandingan sudah dimulai), atau ketik 'no' untuk keluar: ")
-        if masukan == 'no':
-            main_lagi = 0
+        if otomatis_main:
+            main_lagi = 1
+        else:
+            masukan = input("Ketik 'start' untuk lanjut suggest (ketika pertandingan sudah dimulai), atau ketik 'no' untuk keluar: ")
+            if masukan == 'no':
+                main_lagi = 0
     driver.close()
     engine.close()
 
