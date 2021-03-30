@@ -123,29 +123,29 @@ def main_game(driver, engine, otomatis_main, depth, warna):
             if((warna == 'putih' and letak_gerakan % 2 == 0) or (warna == 'hitam' and letak_gerakan % 2 == 1)):
                 if mode == 'bullet':
                     if letak_gerakan <= 15:
-                        waktu = random.choice ([0.05,0.10])
+                        waktu = random.choice ([0.05,0.10,0.75,1])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([0.05,0.10,1.00,1.50])
+                        waktu = random.choice ([0.05,0.10,1.00,1.25,1.50,1.75,2.25])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'blitz':
                     if letak_gerakan <= 15:
-                        waktu = random.choice ([1,2,3])
+                        waktu = random.choice ([1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([1,2,3,4])
+                        waktu = random.choice ([1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75,4.25,4.50,4.75])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'rapid':
                     if letak_gerakan <= 15:
-                        waktu = random.randint(1,2)
+                        waktu = random.randint(1.25,1.50,1.75,2.25,2.50,2.75)
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.randint(1,7)
+                        waktu = random.randint(1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75,4.25,4.50,4.75,5.50,6.75,7.25)
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
             warna_kotak(driver, terbaik)
