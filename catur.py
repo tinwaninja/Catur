@@ -149,7 +149,7 @@ def cari_warna(driver, otomatis_main):
         try:
             if otomatis_main:
                 try:
-                    sudah = driver.find_element_by_class_name("game-over-button-button").click()
+                    sudah = driver.find_element_by_class_name("game-over-button-seeking")
                     print("Menunggu lawan")
                 except:
                     try:
@@ -159,8 +159,6 @@ def cari_warna(driver, otomatis_main):
                         time.sleep(1)
                         driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
                         driver.find_element_by_class_name("quick-challenge-play").click()
-                    else:
-                        print("Menunggu pertandingan dimulai")
             element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
