@@ -4,7 +4,7 @@ Is a suggestion for chess moves on the chess.com platform. The available feature
 ## installation (Windows)
 
 1. Install Python <br />
-You can install it here [Python](https://www.python.org/downloads/). Don't forget to tick (Add Python to PATH)  ![Install Python](./documentation/python_install.jpeg)
+You can install it here [Python](https://www.python.org/downloads/). Don't forget to tick (Add Python to PATH)  ![Install Python](./documentation/python_install.jpeg) <br />
 To check that Python has been successfully installed, open CMD and type "python", if python is run successfully then Python is successfully installed, but if directed to the Windows Store please solve it by following the advice from [stackoverflow](https://stackoverflow.com/questions/58754860/cmd-opens-window-store-when-i-type-python).
 2. Clone Repository <br />
 Install [Git](https://git-scm.com/download/win) in Windows, then run the command below:
@@ -32,7 +32,7 @@ python catur.py
 ```
 The script will automatically open Mozilla Firefox and automatically login based on existing credentials. <br />
 Next, start the match (Live Match).
-![Auto Chess](./documentation/Catur.gif)
+![Auto Chess](./documentation/Catur.gif) <br />
 If you get the first turn (in white) then please advance the pawn to e4. (For the first turn you have to run 1x first, but if you are the second turn the script will run automatically).
 ## Additional
 You can change the movement speed of chess moves by changing the value of the blitz in the chess.py script on line 18 with the value "True" or "False".
