@@ -3,6 +3,7 @@ import chess.engine
 import chess.pgn
 import random
 import os
+import re
 import time
 from configparser import ConfigParser
 from datetime import datetime
@@ -12,11 +13,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
 
-otomatis_main = True
-#blitz untuk mengatur kecepatan langkah, True untuk permainan kilat (blitz), False untuk langkah 1-3 detik
-blitz = True
-
+#mode ada 3 pilihan yaitu : bullet, blitz, rapid. bullet untuk langkah cepat pertandingan 1 menit, blitz untuk pertandingan 3-5 menit, rapid untuk pertandingan 10 menit
+mode = 'bullet'
+pengguna = ''
 #lokasi file
 lokasi_file = os.path.abspath(__file__)
 lokasi_engine = "/engine/stockfish.exe"
@@ -25,6 +26,7 @@ lokasi_akun = lokasi_file[:-8] + "akun.txt"
 
 #kredensial akun
 def Kredensial():
+    global pengguna
     with open(lokasi_akun, "r") as f:
         pengguna = f.readline().strip()
         kata_sandi = f.readline().strip()
@@ -92,8 +94,8 @@ def cari_terbaik(engine, notasi, depth):
         return terbaik
 
 #main game
-def main_game(driver, engine, otomatis_main, depth):
-    global blitz
+def main_game(driver, engine, otomatis_main, depth, warna):
+    global mode
     if otomatis_main:
         try:
             time.sleep(1)
@@ -107,6 +109,10 @@ def main_game(driver, engine, otomatis_main, depth):
     notasi = buat_notasi()
     time.sleep(1)
     try:
+        if warna == 'putih':
+            warna_kotak(driver, 'e2e4')
+            gerakan_otomatis(driver)
+
         for letak_gerakan in range(1,500):
             gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
             with open(notasi, "a") as f:
@@ -114,14 +120,71 @@ def main_game(driver, engine, otomatis_main, depth):
             start_time = time.time()
             terbaik = cari_terbaik(engine, notasi, depth)
             end_time = time.time()
-            print(end_time-start_time)
+            if((warna == 'putih' and letak_gerakan % 2 == 0) or (warna == 'hitam' and letak_gerakan % 2 == 1)):
+                if mode == 'bullet':
+                    if letak_gerakan <= 15:
+                        waktu = random.choice ([0.05,0.10])
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
+                    if letak_gerakan >= 15:
+                        waktu = random.choice ([0.05,0.10,1.00,1.50])
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
+                if mode == 'blitz':
+                    if letak_gerakan <= 15:
+                        waktu = random.choice ([1,2,3])
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
+                    if letak_gerakan >= 15:
+                        waktu = random.choice ([1,2,3,4,5])
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
+                if mode == 'rapid':
+                    if letak_gerakan <= 15:
+                        waktu = random.randint(1,2)
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
+                    if letak_gerakan >= 15:
+                        waktu = random.randint(1,7)
+                        print('delay', waktu,' detik')
+                        time.sleep( waktu )
             warna_kotak(driver, terbaik)
-            if blitz != True:
-                #time.sleep(random.randint(1,3))
-                time.sleep( random.choice ([0.05, 1.05, 1.50, 1.00]) )
             gerakan_otomatis(driver)
     except:
         return
+
+#cari warna
+def cari_warna(driver):
+    while (1):
+        try:
+            element = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
+            break
+        except TimeoutException:
+            print("Menunggu pertandingan dimulai")
+
+    komponen = driver.find_elements_by_class_name("chat-message-component")
+
+    if('warn-message-component' in komponen[-1].get_attribute('class')):
+        warna_mentah = komponen[-2]
+    else:
+        warna_mentah = komponen[-1]
+
+    print(warna_mentah.text)
+    
+    warna_pengguna = re.findall(r'(\w+)\s\(\d+\)', warna_mentah.text)
+
+    cek_putih = warna_pengguna[0]
+
+    global pengguna
+    global mode
+    print('mode kecepatan permainan: ' + mode)
+    if cek_putih == pengguna:
+        print(pengguna + ' bermain sebagai putih')
+        return "putih"
+    else:
+        print(pengguna + ' bermain sebagai hitam')
+        return "hitam"
 
 #suggest warna
 def warna_kotak(driver, best_move):
@@ -180,7 +243,8 @@ def main():
     main_lagi = 1
     depth, otomatis_main = buka_pengaturan()
     while main_lagi:
-        main_game(driver, engine, otomatis_main, depth)
+        warna = cari_warna(driver)
+        main_game(driver, engine, otomatis_main, depth, warna)
         masukan = input("Ketik 'start' untuk lanjut suggest (ketika pertandingan sudah dimulai), atau ketik 'no' untuk keluar: ")
         if masukan == 'no':
             main_lagi = 0

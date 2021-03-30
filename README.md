@@ -33,9 +33,16 @@ python catur.py
 The script will automatically open Mozilla Firefox and automatically login based on existing credentials. <br />
 Next, start the match (Live Match).
 ![Auto Chess](./documentation/Catur.gif) <br />
-If you get the first turn (in white) then please advance the pawn to e4. (For the first turn you have to run 1x first, but if you are the second turn the script will run automatically).
 ## Additional
-You can change the movement speed of chess moves by changing the value of the blitz in the chess.py script on line 18 with the value "True" or "False".
+You can change the movement speed of chess moves by changing the value of the mode in the chess.py script on line 19 with the value 'bullet', 'blitz', or 'rapid'. <br />
+If you want to find automatic live matches, change the config.ini file and change autostart = 0 to autostart = 1.
+### Update
+1. First Commit <br />
+project published.
+2. V2 Commit<br />
+automatically run the pawn (if it gets white). <br />
+add mode, mode there are 3 options, namely: bullet, blitz, rapid. bullet for quick-paced 1-minute matches, blitz for 3-5-minute matches, rapid for 10-minute matches. <br />
+increase the delay, if the game is early then the delay is with a small time value, if it is in the middle of the game then the delay will be a choice of time with a small and medium value
 ## Thanks
 This script is made from libraries and fixes existing scripts. In developing this script I am very grateful to:
 1. [StockFish](https://stockfishchess.org/download/)
