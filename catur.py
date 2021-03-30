@@ -123,11 +123,11 @@ def main_game(driver, engine, otomatis_main, depth, warna):
             if((warna == 'putih' and letak_gerakan % 2 == 0) or (warna == 'hitam' and letak_gerakan % 2 == 1)):
                 if mode == 'bullet':
                     if letak_gerakan <= 15:
-                        waktu = random.choice ([0.05,0.10,0.75,1])
+                        waktu = random.choice ([0.05,0.10])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([0.05,0.10,1.00,1.25,1.50,1.75,2.25])
+                        waktu = random.choice ([0.05,0.10,1.00])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'blitz':
