@@ -34,7 +34,7 @@ The script will automatically open Mozilla Firefox and automatically login based
 Next, start the match (Live Match).
 ![Auto Chess](./documentation/Catur.gif) <br />
 ## Additional
-You can change the movement speed of chess moves by changing the value of the mode in the chess.py script on line 19 with the value 'bullet', 'blitz', or 'rapid'. <br />
+You can change the movement speed of chess moves by changing the value of the mode in the catur.py script on line 19 with the value 'bullet', 'blitz', or 'rapid'. <br />
 If you want to find automatic live matches, change the config.ini file and change autostart = 0 to autostart = 1.
 ### Update
 1. First Commit <br />
