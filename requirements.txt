@@ -1,0 +1,2 @@
+python-chess==0.31.4
+selenium==3.141.0
