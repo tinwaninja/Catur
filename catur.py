@@ -15,7 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 otomatis_main = True
 #blitz untuk mengatur kecepatan langkah, True untuk permainan kilat (blitz), False untuk langkah 1-3 detik
-blitz = False
+blitz = True
 
 #lokasi file
 lokasi_file = os.path.abspath(__file__)
