@@ -23,7 +23,7 @@ lokasi_file = os.path.abspath(__file__)
 lokasi_engine = "/engine/stockfish.exe"
 lokasi_stockfish = lokasi_file[:-9] + lokasi_engine
 lokasi_akun = lokasi_file[:-8] + "akun.txt"
-
+total_cari_lawan = 0
 #kredensial akun
 def Kredensial():
     global pengguna
@@ -76,6 +76,7 @@ def deteksi_gerakan(driver, letak_gerakan):
 
     if pindah.text[0].isdigit():
         print("GAME SELESAI")
+        driver.get("https://www.chess.com/live")
         return
     if letak_gerakan % 2 == 1:
         return str(lokasi) + "." + pindah.text + " "
@@ -204,6 +205,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
 
 #cari warna
 def cari_warna(driver, otomatis_main):
+    global total_cari_lawan
     while (1):
         try:
             if otomatis_main:
@@ -249,7 +251,11 @@ def cari_warna(driver, otomatis_main):
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
         except TimeoutException:
-            print("Menunggu pertandingan dimulai")
+            print("Menunggu pertandingan dimulai ",total_cari_lawan)
+            total_cari_lawan =+ 1
+            if(total_cari_lawan > 8):
+                total_cari_lawan = 0
+                driver.get("https://www.chess.com/live")
 
     komponen = driver.find_elements_by_class_name("chat-message-component")
 
