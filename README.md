@@ -46,7 +46,7 @@ increase the delay, if the game is early then the delay is with a small time val
 2. V3 Commit<br />
 Fixed being stuck looking for new matches.<br />
 Fixed a stuck in skip aborted match.<br />
-Fixed a stuck in a match that immediately gave up.
+Automatically accept the challenge or rematch.<br />
 ## Thanks
 This script is made from libraries and fixes existing scripts. In developing this script I am very grateful to:
 1. [StockFish](https://stockfishchess.org/download/)

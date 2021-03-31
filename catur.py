@@ -124,6 +124,19 @@ def skip_aborted():
     except:
         pass
 
+    #jika akun gratisan akan muncul notif tidak bisa search macth 2x sekaligus
+    try:
+        tantangan = driver.find_element_by_class_name("challenge-multiple-games-body")
+        if tantangan:
+            try:
+                time.sleep(2)
+                close = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[1]/div/div[2]/div[2]/button[1]").click()
+                print("Skip tantangan karena akun tidak memumpuni")
+            except:
+                pass
+    except:
+        pass
+
 #pilih promosi pion yang sekolah
 def ambil_promosi():
     try:
@@ -207,9 +220,22 @@ def cari_warna(driver, otomatis_main):
                     sudah = driver.find_element_by_class_name("game-over-button-seeking")
                     print("Menunggu lawan")
                 except:
+                    time.sleep(5)
                     try:
-                        time.sleep(5)
+                        rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
+                        if rematch:
+                            print("Mencoba rematch")
+                    except:
+                        pass
+                    try:
+                        baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                        if baru:
+                            print("Mencoba mencari pertandingan baru")
+                    except:
+                        pass
+                    try:
                         permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
+                        print("Mencoba mencari pertandingan baru")
                     except:
                         try:
                             time.sleep(1)
