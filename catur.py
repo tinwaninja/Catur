@@ -140,20 +140,13 @@ def skip_aborted():
 #pilih promosi pion yang sekolah
 def ambil_promosi():
     try:
-        menu = driver.find_element_by_class_name("promotion-menu").click()
+        time.sleep(0.05)
+        menu = driver.find_element_by_id("promotion-menu")
         if menu:
             try:
-                promosi = driver.find_element_by_class_name("promotion-piece")
-                if promosi:
-                    try:
-                        for pilih in promosi:
-                            try:
-                                pilih.click()
-                                print("Memilih promosi")
-                            except:
-                                pass
-                    except:
-                        pass
+                time.sleep(2)
+                promosi = driver.find_element_by_xpath('//div[@data-type="q"]').click()
+                print("Memilih promosi")
             except:
                 pass
     except:
@@ -207,7 +200,8 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         time.sleep( waktu )
             warna_kotak(driver, terbaik)
             gerakan_otomatis(driver)
-            ambil_promosi()
+            if letak_gerakan >= 25:
+                ambil_promosi()
     except:
         return
 
@@ -220,7 +214,7 @@ def cari_warna(driver, otomatis_main):
                     sudah = driver.find_element_by_class_name("game-over-button-seeking")
                     print("Menunggu lawan")
                 except:
-                    time.sleep(3)
+                    time.sleep(5)
                     try:
                         baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
                         if baru:
@@ -329,7 +323,6 @@ def main():
     main_lagi = 1
     depth, otomatis_main = buka_pengaturan()
     while main_lagi:
-        skip_aborted()
         warna = cari_warna(driver, otomatis_main)
         main_game(driver, engine, otomatis_main, depth, warna)
         if otomatis_main:
