@@ -249,7 +249,7 @@ def cari_warna(driver, otomatis_main):
             break
         except TimeoutException:
             print("Menunggu pertandingan dimulai ",total_cari_lawan)
-            total_cari_lawan =+ 1
+            total_cari_lawan += 1
             if(total_cari_lawan > 8):
                 total_cari_lawan = 0
                 driver.get("https://www.chess.com/live")
