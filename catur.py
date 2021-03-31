@@ -124,17 +124,17 @@ def skip_aborted():
         pass
 
     #jika akun gratisan akan muncul notif tidak bisa search macth 2x sekaligus
-    try:
-        tantangan = driver.find_element_by_class_name("challenge-multiple-games-body")
-        if tantangan:
-            try:
-                time.sleep(2)
-                close = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[1]/div/div[2]/div[2]/button[1]").click()
-                print("Skip tantangan karena akun tidak memumpuni")
-            except:
-                pass
-    except:
-        pass
+    # try:
+    #     tantangan = driver.find_element_by_class_name("challenge-multiple-games-body")
+    #     if tantangan:
+    #         try:
+    #             time.sleep(2)
+    #             close = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[1]/div/div[2]/div[2]/button[1]").click()
+    #             print("Skip tantangan karena akun tidak memumpuni")
+    #         except:
+    #             pass
+    # except:
+    #     pass
 
 #pilih promosi pion yang sekolah
 def ambil_promosi():
