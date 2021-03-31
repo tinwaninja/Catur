@@ -93,6 +93,59 @@ def cari_terbaik(engine, notasi, depth):
         terbaik = engine.play(papan, chess.engine.Limit(depth=depth)).move
         return terbaik
 
+#skip aborted game
+def skip_aborted():
+    try:
+        sudah = driver.find_element_by_class_name("game-over-dialog-content")
+        if sudah:
+            try:
+                time.sleep(5)
+                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
+                print("Skip game yang dibatalkan")
+                time.sleep(1)
+                driver.get("https://www.chess.com/live")
+            except:
+                pass
+    except:
+        pass
+    
+    #jika lawan langung mengaku kalah / mengalah
+    try:
+        mengalah = driver.find_element_by_class_name("game-over-header-userWon")
+        if mengalah:
+            try:
+                time.sleep(5)
+                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
+                print("Skip game karena lawan mengalah")
+                time.sleep(1)
+                driver.get("https://www.chess.com/live")
+            except:
+                pass
+    except:
+        pass
+
+#pilih promosi pion yang sekolah
+def ambil_promosi():
+    try:
+        menu = driver.find_element_by_class_name("promotion-menu").click()
+        if menu:
+            try:
+                promosi = driver.find_element_by_class_name("promotion-piece")
+                if promosi:
+                    try:
+                        for pilih in promosi:
+                            try:
+                                pilih.click()
+                                print("Memilih promosi")
+                            except:
+                                pass
+                    except:
+                        pass
+            except:
+                pass
+    except:
+        pass
+
 #main game
 def main_game(driver, engine, otomatis_main, depth, warna):
     global mode
@@ -104,6 +157,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
             gerakan_otomatis(driver)
 
         for letak_gerakan in range(1,500):
+            skip_aborted()
             gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
             with open(notasi, "a") as f:
                 f.write(gerakan_selanjutnya)
@@ -140,6 +194,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         time.sleep( waktu )
             warna_kotak(driver, terbaik)
             gerakan_otomatis(driver)
+            ambil_promosi()
     except:
         return
 
@@ -156,9 +211,12 @@ def cari_warna(driver, otomatis_main):
                         time.sleep(5)
                         permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
                     except:
-                        time.sleep(1)
-                        driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
-                        driver.find_element_by_class_name("quick-challenge-play").click()
+                        try:
+                            time.sleep(1)
+                            driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
+                            driver.find_element_by_class_name("quick-challenge-play").click()
+                        except:
+                            pass
             element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
@@ -245,6 +303,7 @@ def main():
     main_lagi = 1
     depth, otomatis_main = buka_pengaturan()
     while main_lagi:
+        skip_aborted()
         warna = cari_warna(driver, otomatis_main)
         main_game(driver, engine, otomatis_main, depth, warna)
         if otomatis_main:
