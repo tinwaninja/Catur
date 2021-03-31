@@ -165,7 +165,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
             skip_aborted()
             gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
             with open(notasi, "a") as f:
-                f.write(gerakan_selanjutnya)
+               f.write(gerakan_selanjutnya)
             terbaik = cari_terbaik(engine, notasi, depth)
             if((warna == 'putih' and letak_gerakan % 2 == 0) or (warna == 'hitam' and letak_gerakan % 2 == 1)):
                 if mode == 'bullet':
@@ -195,10 +195,10 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         waktu = random.randint(1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75,4.25,4.50,4.75,5.50,6.75,7.25)
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
-            warna_kotak(driver, terbaik)
-            gerakan_otomatis(driver)
-            if letak_gerakan >= 25:
-                ambil_promosi()
+                warna_kotak(driver, terbaik)
+                gerakan_otomatis(driver)
+                if letak_gerakan >= 25:
+                    ambil_promosi()
     except:
         return
 
