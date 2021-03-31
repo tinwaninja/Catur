@@ -215,7 +215,7 @@ def cari_warna(driver, otomatis_main):
                             sudah = driver.find_element_by_class_name("game-over-button-seeking")
                             print("Menunggu lawan")
                         except:
-                            time.sleep(3)
+                            time.sleep(2)
                             try:
                                 rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
                                 if rematch:
@@ -223,6 +223,7 @@ def cari_warna(driver, otomatis_main):
                             except:
                                 pass
                             try:
+                                time.sleep(2)
                                 baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
                                 if baru:
                                     print("Mencoba mencari pertandingan baru")
