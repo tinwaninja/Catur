@@ -57,7 +57,6 @@ def masuk(driver, pengguna, kata_sandi):
 
 #buat notasi / pgn
 def buat_notasi():
-    time_now = datetime.now()
     lokasi_notasi = lokasi_file[:-8]+"history/pgn.pgn"
     open(lokasi_notasi, "w+").close
     return lokasi_notasi
@@ -211,32 +210,42 @@ def cari_warna(driver, otomatis_main):
         try:
             if otomatis_main:
                 try:
-                    sudah = driver.find_element_by_class_name("game-over-button-seeking")
-                    print("Menunggu lawan")
+                    cek = driver.find_element_by_class_name("game-over-dialog-content")
+                    print("Mengecek pertandingan apakah telah berakhir")
+                    if cek:
+                        try:
+                            sudah = driver.find_element_by_class_name("game-over-button-seeking")
+                            print("Menunggu lawan")
+                        except:
+                            time.sleep(3)
+                            try:
+                                baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                                if baru:
+                                    print("Mencoba mencari pertandingan baru")
+                            except:
+                                pass
+                            try:
+                                rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
+                                if rematch:
+                                    print("Mencoba rematch")
+                            except:
+                                pass            
+                            try:
+                                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
+                                print("Mencoba mencari pertandingan baru")
+                            except:
+                                try:
+                                    time.sleep(1)
+                                    driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
+                                    driver.find_element_by_class_name("quick-challenge-play").click()
+                                except:
+                                    pass
                 except:
-                    time.sleep(5)
                     try:
-                        baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
-                        if baru:
-                            print("Mencoba mencari pertandingan baru")
+                        cek = driver.find_element_by_class_name("quick-challenge-play").click()
+                        print("Membuat tantangan pertandingan baru")
                     except:
                         pass
-                    try:
-                        rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
-                        if rematch:
-                            print("Mencoba rematch")
-                    except:
-                        pass            
-                    try:
-                        permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
-                        print("Mencoba mencari pertandingan baru")
-                    except:
-                        try:
-                            time.sleep(1)
-                            driver.find_element_by_xpath("//li[@data-tab='challenge']").click()
-                            driver.find_element_by_class_name("quick-challenge-play").click()
-                        except:
-                            pass
             element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
@@ -323,6 +332,7 @@ def main():
     main_lagi = 1
     depth, otomatis_main = buka_pengaturan()
     while main_lagi:
+        skip_aborted()
         warna = cari_warna(driver, otomatis_main)
         main_game(driver, engine, otomatis_main, depth, warna)
         if otomatis_main:
