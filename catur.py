@@ -16,7 +16,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
 
 #mode ada 3 pilihan yaitu : bullet, blitz, rapid. bullet untuk langkah cepat pertandingan 1 menit, blitz untuk pertandingan 3-5 menit, rapid untuk pertandingan 10 menit
-mode = 'bullet'
+mode = 'blitz'
 pengguna = ''
 #lokasi file
 lokasi_file = os.path.abspath(__file__)
@@ -24,6 +24,7 @@ lokasi_engine = "/engine/stockfish.exe"
 lokasi_stockfish = lokasi_file[:-9] + lokasi_engine
 lokasi_akun = lokasi_file[:-8] + "akun.txt"
 total_cari_lawan = 0
+jika_menang = ""
 #kredensial akun
 def Kredensial():
     global pengguna
@@ -140,30 +141,33 @@ def skip_aborted():
 #pilih promosi pion yang sekolah
 def ambil_promosi():
     try:
-        time.sleep(0.05)
-        menu = driver.find_element_by_id("promotion-menu")
-        if menu:
-            try:
-                time.sleep(2)
-                promosi = driver.find_element_by_xpath('//div[@data-type="q"]').click()
-                print("Memilih promosi")
-            except:
-                pass
+        promosi = driver.find_element_by_xpath('//div[@data-type="q"]').click()
+        print("Memilih promosi")
     except:
         pass
 
 #main game
 def main_game(driver, engine, otomatis_main, depth, warna):
-    global mode
+    global mode, jika_menang
     notasi = buat_notasi()
     time.sleep(1)
     try:
-        if warna == 'putih':
-            warna_kotak(driver, 'e2e4')
-            gerakan_otomatis(driver)
+        if "win 0" not in jika_menang: 
+            if warna == 'putih':
+                warna_kotak(driver, 'e2e4')
+                gerakan_otomatis(driver)
 
         for letak_gerakan in range(1,500):
             skip_aborted()
+            if letak_gerakan == 1 or letak_gerakan == 2:
+                if "win 0" in jika_menang: 
+                    print("Lawan terlalu cupu, mencoba abort match dengan delay 25 detik")
+                    jika_menang = ""
+                    time.sleep(25)
+                    return
+            if letak_gerakan >= 60:
+                time.sleep(0.15)
+                ambil_promosi()
             gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
             with open(notasi, "a") as f:
                f.write(gerakan_selanjutnya)
@@ -180,32 +184,31 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         time.sleep( waktu )
                 if mode == 'blitz':
                     if letak_gerakan <= 15:
-                        waktu = random.choice ([1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75])
+                        waktu = random.choice ([0.05,0.10,0.25])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.choice ([1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75,4.25,4.50,4.75])
+                        waktu = random.choice ([0.05,0.10,0.25,1.25])
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 if mode == 'rapid':
                     if letak_gerakan <= 15:
-                        waktu = random.randint(1.25,1.50,1.75,2.25,2.50,2.75)
+                        waktu = random.randint(0.05,0.10,0.25,1.25)
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                     if letak_gerakan >= 15:
-                        waktu = random.randint(1.25,1.50,1.75,2.25,2.50,2.75,3.25,3.50,3.75,4.25,4.50,4.75,5.50,6.75,7.25)
+                        waktu = random.randint(0.05,0.10,0.25,1.25,1.50,1.75,2.25)
                         print('delay', waktu,' detik')
                         time.sleep( waktu )
                 warna_kotak(driver, terbaik)
                 gerakan_otomatis(driver)
-                if letak_gerakan >= 25:
-                    ambil_promosi()
+                
     except:
         return
 
 #cari warna
 def cari_warna(driver, otomatis_main):
-    global total_cari_lawan
+    global total_cari_lawan, jika_menang
     while (1):
         try:
             if otomatis_main:
@@ -221,8 +224,19 @@ def cari_warna(driver, otomatis_main):
                             try:
                                 rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").text
                                 if rematch != 'Rematch':
-                                    rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
-                                    print("Acc rematch")
+                                    sebelumnya_kalah = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[1]/h3").text
+                                    if "You Won" in sebelumnya_kalah: 
+                                        if "win 0" not in jika_menang: 
+                                            #ini untuk acc rematch yang pemain setara
+                                            rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
+                                            print("Acc rematch karena pemain setara")
+                                        else: 
+                                            #ini untuk tolak rematch pemain cupu
+                                            rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                                            print("Menolak rematch karena pemain cupu")
+                                    else:
+                                        rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                                        print("Menolak rematch karena pemain terlalu pro")
                             except:
                                 time.sleep(2)
                                 baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
@@ -252,6 +266,12 @@ def cari_warna(driver, otomatis_main):
             total_cari_lawan += 1
             if(total_cari_lawan > 8):
                 total_cari_lawan = 0
+                try:
+                    baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                    if baru:
+                        print("Mencoba mencari pertandingan baru")
+                except:
+                    pass
                 driver.get("https://www.chess.com/live")
 
     komponen = driver.find_elements_by_class_name("chat-message-component")
@@ -260,7 +280,7 @@ def cari_warna(driver, otomatis_main):
         warna_mentah = komponen[-2]
     else:
         warna_mentah = komponen[-1]
-
+    jika_menang = warna_mentah.text
     print(warna_mentah.text)
     
     warna_pengguna = re.findall(r'(\w+)\s\(\d+\)', warna_mentah.text)

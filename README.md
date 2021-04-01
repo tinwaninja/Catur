@@ -43,10 +43,14 @@ project published.
 automatically run the pawn (if it gets white). <br />
 add mode, mode there are 3 options, namely: bullet, blitz, rapid. bullet for quick-paced 1-minute matches, blitz for 3-5-minute matches, rapid for 10-minute matches. <br />
 increase the delay, if the game is early then the delay is with a small time value, if it is in the middle of the game then the delay will be a choice of time with a small and medium value
-2. V3 Commit<br />
+3. V3 Commit<br />
 Fixed being stuck looking for new matches.<br />
 Fixed a stuck in skip aborted match.<br />
 Automatically accept the challenge (rematch).<br />
+4. V4 Commit<br />
+Skip requests for rematch in the match if your opponent is too weak (unbalanced).<br />
+Skip rematch requests if you lost in the previous match.<br />
+Accept the challenge if the player against the chess match.<br />
 ## Thanks
 This script is made from libraries and fixes existing scripts. In developing this script I am very grateful to:
 1. [StockFish](https://stockfishchess.org/download/)
