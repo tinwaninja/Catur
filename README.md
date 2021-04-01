@@ -51,6 +51,8 @@ Automatically accept the challenge (rematch).<br />
 Skip requests for rematch in the match if your opponent is too weak (unbalanced).<br />
 Skip rematch requests if you lost in the previous match.<br />
 Accept the challenge if the player against the chess match.<br />
+5. V5 Commit<br />
+Automatically takes the pawn promotion to queen. (Private in the catur.py script on line 144)<br />
 ## Thanks
 This script is made from libraries and fixes existing scripts. In developing this script I am very grateful to:
 1. [StockFish](https://stockfishchess.org/download/)

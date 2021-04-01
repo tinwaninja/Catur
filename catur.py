@@ -138,11 +138,14 @@ def skip_aborted():
     # except:
     #     pass
 
+
 #pilih promosi pion yang sekolah
-def ambil_promosi():
+def ambil_promosi(driver, terbaik):
+    #untuk bisa menggunakan fitur ini silahkan email : tinwaninja@gmail.com
+    dapat_promosi = ['tinwaninja@gmail.com']
     try:
-        promosi = driver.find_element_by_xpath('//div[@data-type="q"]').click()
-        print("Memilih promosi")
+        if any(str(terbaik) in item for item in dapat_promosi):
+            print("Promosi ditemukan ",terbaik)
     except:
         pass
 
@@ -165,9 +168,6 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                     jika_menang = ""
                     time.sleep(25)
                     return
-            if letak_gerakan >= 60:
-                time.sleep(0.15)
-                ambil_promosi()
             gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
             with open(notasi, "a") as f:
                f.write(gerakan_selanjutnya)
@@ -202,6 +202,7 @@ def main_game(driver, engine, otomatis_main, depth, warna):
                         time.sleep( waktu )
                 warna_kotak(driver, terbaik)
                 gerakan_otomatis(driver)
+                ambil_promosi(driver, terbaik)
                 
     except:
         return
@@ -275,14 +276,15 @@ def cari_warna(driver, otomatis_main):
                 driver.get("https://www.chess.com/live")
 
     komponen = driver.find_elements_by_class_name("chat-message-component")
-
-    if('warn-message-component' in komponen[-1].get_attribute('class')):
-        warna_mentah = komponen[-2]
-    else:
-        warna_mentah = komponen[-1]
-    jika_menang = warna_mentah.text
-    print(warna_mentah.text)
-    
+    try:
+        if('warn-message-component' in komponen[-1].get_attribute('class')):
+            warna_mentah = komponen[-2]
+        else:
+            warna_mentah = komponen[-1]
+        jika_menang = warna_mentah.text
+        print(warna_mentah.text)
+    except:
+        return
     warna_pengguna = re.findall(r'(\w+)\s\(\d+\)', warna_mentah.text)
 
     cek_putih = warna_pengguna[0]
@@ -298,9 +300,9 @@ def cari_warna(driver, otomatis_main):
         return "hitam"
 
 #suggest warna
-def warna_kotak(driver, best_move):
-    kotak_awal = str(best_move)[:2]
-    kotak_tujuan = str(best_move)[2:]
+def warna_kotak(driver, terbaik):
+    kotak_awal = str(terbaik)[:2]
+    kotak_tujuan = str(terbaik)[2:]
     lokasi_awal = str(0) + str(ord(kotak_awal[0])-96) + str(0) + kotak_awal[1]
     lokasi_tujuan = str(0) + str(ord(kotak_tujuan[0])-96) + str(0) + kotak_tujuan[1]
     driver.execute_script("""
