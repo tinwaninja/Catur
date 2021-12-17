@@ -68,9 +68,8 @@ def board_movement(driver, movement_location):
     colours = [1, 0]
     next_move = ""
     colour = colours[movement_location%2]
-    ## TODO: Change lokasi to location
-    lokasi = (movement_location+1)//2
-    xpath = f"/html/body/div[3]/div/div[1]/div[1]/div/div[1]/div/div/div[{lokasi}]/span[{colour+2}]/span[contains(@class, 'vertical-move-list-clickable')]"
+    location = (movement_location+1)//2
+    xpath = f"/html/body/div[3]/div/div[1]/div[1]/div/div[1]/div/div/div[{location}]/span[{colour+2}]/span[contains(@class, 'vertical-move-list-clickable')]"
     WebDriverWait(driver, 120).until(
     EC.presence_of_element_located((By.XPATH, xpath))
     )
@@ -81,7 +80,7 @@ def board_movement(driver, movement_location):
         print("GAME FINISHED")
         return
     if movement_location % 2 == 1:
-        return str(lokasi) + "." + move.text + " "
+        return str(location) + "." + move.text + " "
     else:
         return move.text + " "
 
@@ -184,7 +183,6 @@ def main_game(driver, engine, automation_main, depth, colour):
     except:
         return
 
-### TODO: Refactor this:
 #Search by colour:
 def search_colour(driver, automation_main):
     global total_opponents_found, total_wins
