@@ -15,109 +15,95 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
 
-#mode ada 3 pilihan yaitu : bullet, blitz, rapid. bullet untuk langkah cepat pertandingan 1 menit, blitz untuk pertandingan 3-5 menit, rapid untuk pertandingan 10 menit
+#Modes: bullet, blitz, rapid. Bullet for fast paced 1 minute matches, blitz for 3-5 minute matches, rapid for a 10+ minute match.
 mode = 'blitz'
-pengguna = ''
-#lokasi file
-lokasi_file = os.path.abspath(__file__)
-lokasi_engine = "/engine/stockfish.exe"
-lokasi_stockfish = lokasi_file[:-9] + lokasi_engine
-lokasi_akun = lokasi_file[:-8] + "akun.txt"
-total_cari_lawan = 0
-jika_menang = ""
-#kredensial akun
-def Kredensial():
-    global pengguna
-    with open(lokasi_akun, "r") as f:
-        pengguna = f.readline().strip()
-        kata_sandi = f.readline().strip()
-    if not pengguna and not kata_sandi:
-        print("Nama pengguna / kata sandi tidak tersedia di akun.txt")
-        pengguna = input("username: ")
-        kata_sandi = input("password: ")
-    return [pengguna, kata_sandi]
+user = ''
+#Get engine location:
+current_directory = os.path.abspath(__file__)
+engine_executable = "/engine/stockfish.exe"
+stockfish_location = current_directory[:-9] + engine_executable
+account_location = current_directory[:-8] + "account.txt"
+total_opponents_found = 0
+total_wins = ""
+#Get account credentials:
+def credentials():
+    global user
+    with open(account_location, "r") as f:
+        user = f.readline().strip()
+        password = f.readline().strip()
+        password = f.readline().strip()
+    if not user and not password:
+        print("Username / password not found in account.txt")
+        user = input("username: ")
+        password = input("password: ")
+    return [user, password]
 
-#selenium
-def buka_selenium():
+#Setup firefox's marionette (Selenium/WebDriver):
+def open_selenium():
     profile = webdriver.FirefoxProfile()
-    profile.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0")
-    gecko_loc = lokasi_file[:-8] + "geckodriver.exe"
-    driver = webdriver.Firefox(profile, executable_path=gecko_loc)
+    profile.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0")
+    gecko_location = current_directory[:-8] + "geckodriver.exe"
+    driver = webdriver.Firefox(profile, executable_path=gecko_location)
     driver.get("https://www.chess.com/login")
     return driver
 
-#masuk
-def masuk(driver, pengguna, kata_sandi):
-    form_pengguna = driver.find_element_by_id("username")
-    form_pengguna.send_keys(pengguna)
-    form_katasandi = driver.find_element_by_id("password")
-    form_katasandi.send_keys(kata_sandi)
-    form_katasandi.send_keys(Keys.RETURN)
+#Login:
+def enter(driver, user, password):
+    form_user = driver.find_element_by_id("username")
+    form_user.send_keys(user)
+    form_password = driver.find_element_by_id("password")
+    form_password.send_keys(password)
+    form_password.send_keys(Keys.RETURN)
     time.sleep(5)
-    driver.get("https://www.chess.com/live")  
+    driver.get("https://www.chess.com/live")
 
-#buat notasi / pgn
-def buat_notasi():
-    lokasi_notasi = lokasi_file[:-8]+"history/pgn.pgn"
-    open(lokasi_notasi, "w+").close
-    return lokasi_notasi
+#Create PGN notation:
+def create_notation():
+    notation_location = current_directory[:-8]+"history/pgn.pgn"
+    open(notation_location, "w+").close
+    return notation_location
 
-#deteksi langkah gerakan
-def deteksi_gerakan(driver, letak_gerakan):
-    warnanya = [1, 0]
-    gerakan_selanjutnya = ""
-    warna = warnanya[letak_gerakan%2]
-    lokasi = (letak_gerakan+1)//2
-    xpath = f"/html/body/div[3]/div/div[1]/div[1]/div/div[1]/div/div/div[{lokasi}]/span[{warna+2}]/span[contains(@class, 'vertical-move-list-clickable')]"
+#Detect board movement:
+def board_movement(driver, movement_location):
+    colours = [1, 0]
+    next_move = ""
+    colour = colours[movement_location%2]
+    ## TODO: Change lokasi to location
+    lokasi = (movement_location+1)//2
+    xpath = f"/html/body/div[3]/div/div[1]/div[1]/div/div[1]/div/div/div[{lokasi}]/span[{colour+2}]/span[contains(@class, 'vertical-move-list-clickable')]"
     WebDriverWait(driver, 120).until(
     EC.presence_of_element_located((By.XPATH, xpath))
     )
-    pindah = driver.find_element_by_xpath(xpath)
-    print(letak_gerakan, pindah.text)
+    move = driver.find_element_by_xpath(xpath)
+    print(movement_location, move.text)
 
-    if pindah.text[0].isdigit():
-        print("GAME SELESAI")
-        driver.get("https://www.chess.com/live")
+    if move.text[0].isdigit():
+        print("GAME FINISHED")
         return
-    if letak_gerakan % 2 == 1:
-        return str(lokasi) + "." + pindah.text + " "
+    if movement_location % 2 == 1:
+        return str(lokasi) + "." + move.text + " "
     else:
-        return pindah.text + " "
+        return move.text + " "
 
-#mencari langkah terbaik
-def cari_terbaik(engine, notasi, depth):
-    with open(notasi, "r") as f:
+#Look for the best move:
+def search_best_move(engine, notation, depth):
+    with open(notation, "r") as f:
         game = chess.pgn.read_game(f)
-        papan = chess.Board()
-        for pindah in game.mainline_moves():
-            papan.push(pindah)
-        terbaik = engine.play(papan, chess.engine.Limit(depth=depth)).move
-        return terbaik
+        board = chess.Board()
+        for move in game.mainline_moves():
+            board.push(move)
+        best_move = engine.play(board, chess.engine.Limit(depth=depth)).move
+        return best_move
 
-#skip aborted game
+#Skip aborted game:
 def skip_aborted():
     try:
-        sudah = driver.find_element_by_class_name("game-over-dialog-content")
-        if sudah:
+        game_finished = driver.find_element_by_class_name("game-over-dialog-content")
+        if game_finished:
             try:
                 time.sleep(5)
-                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
-                print("Skip game yang dibatalkan")
-                time.sleep(1)
-                driver.get("https://www.chess.com/live")
-            except:
-                pass
-    except:
-        pass
-    
-    #jika lawan langung mengaku kalah / mengalah
-    try:
-        mengalah = driver.find_element_by_class_name("game-over-header-userWon")
-        if mengalah:
-            try:
-                time.sleep(5)
-                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
-                print("Skip game karena lawan mengalah")
+                new_game = driver.find_element_by_class_name("game-over-button-button").click()
+                print("Game aborted, skipping...")
                 time.sleep(1)
                 driver.get("https://www.chess.com/live")
             except:
@@ -125,127 +111,119 @@ def skip_aborted():
     except:
         pass
 
-    #jika akun gratisan akan muncul notif tidak bisa search macth 2x sekaligus
-    # try:
-    #     tantangan = driver.find_element_by_class_name("challenge-multiple-games-body")
-    #     if tantangan:
-    #         try:
-    #             time.sleep(2)
-    #             close = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[1]/div/div[2]/div[2]/button[1]").click()
-    #             print("Skip tantangan karena akun tidak memumpuni")
-    #         except:
-    #             pass
-    # except:
-    #     pass
-
-
-#pilih promosi pion yang sekolah
-def ambil_promosi(driver, terbaik):
-    #untuk bisa menggunakan fitur ini silahkan email : tinwaninja@gmail.com
-    dapat_promosi = ['tinwaninja@gmail.com']
+    #Game resigned by opponent:
     try:
-        if any(str(terbaik) in item for item in dapat_promosi):
-            print("Promosi ditemukan ",terbaik)
+        game_resigned = driver.find_element_by_class_name("game-over-header-userWon")
+        if game_resigned:
+            try:
+                time.sleep(5)
+                new_game = driver.find_element_by_class_name("game-over-button-button").click()
+                print("Skip game karena lawan game_resigned")
+                time.sleep(1)
+                driver.get("https://www.chess.com/live")
+            except:
+                pass
     except:
         pass
 
-#main game
-def main_game(driver, engine, otomatis_main, depth, warna):
-    global mode, jika_menang
-    notasi = buat_notasi()
+#Main game:
+def main_game(driver, engine, automation_main, depth, colour):
+    global mode, total_wins
+    notation = create_notation()
     time.sleep(1)
     try:
-        if "win 0" not in jika_menang: 
-            if warna == 'putih':
-                warna_kotak(driver, 'e2e4')
-                gerakan_otomatis(driver)
+        if "win 0" not in total_wins:
+            if colour == 'white':
+                colour_box(driver, 'e2e4')
+                engine_movement(driver)
 
-        for letak_gerakan in range(1,500):
+        for movement_location in range(1,500):
             skip_aborted()
-            if letak_gerakan == 1 or letak_gerakan == 2:
-                if "win 0" in jika_menang: 
-                    print("Lawan terlalu cupu, mencoba abort match dengan delay 25 detik")
-                    jika_menang = ""
+            if movement_location == 1 or movement_location == 2:
+                if "win 0" in total_wins:
+                    print("Our opponent is too weak, aborting match in 25 seconds.")
+                    total_wins = ""
                     time.sleep(25)
                     return
-            gerakan_selanjutnya = deteksi_gerakan(driver, letak_gerakan)
-            with open(notasi, "a") as f:
-               f.write(gerakan_selanjutnya)
-            terbaik = cari_terbaik(engine, notasi, depth)
-            if((warna == 'putih' and letak_gerakan % 2 == 0) or (warna == 'hitam' and letak_gerakan % 2 == 1)):
+            next_move = board_movement(driver, movement_location)
+            with open(notation, "a") as f:
+               f.write(next_move)
+            best_move = search_best_move(engine, notation, depth)
+            if((colour == 'white' and movement_location % 2 == 0) or (colour == 'black' and movement_location % 2 == 1)):
                 if mode == 'bullet':
-                    if letak_gerakan <= 15:
-                        waktu = random.uniform(0.05,0.10)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
-                    if letak_gerakan >= 15:
-                        waktu = random.uniform(0.05,0.25)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
+                    if movement_location <= 15:
+                        delay_time = random.uniform(0.05,0.10)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
+                    if movement_location >= 15:
+                        delay_time = random.uniform(0.05,0.25)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
                 if mode == 'blitz':
-                    if letak_gerakan <= 15:
-                        waktu = random.uniform(0.05,0.25)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
-                    if letak_gerakan >= 15:
-                        waktu = random.uniform(0.05,1.25)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
+                    if movement_location <= 15:
+                        delay_time = random.uniform(0.05,0.25)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
+                    if movement_location >= 15:
+                        delay_time = random.uniform(0.05,1.25)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
                 if mode == 'rapid':
-                    if letak_gerakan <= 15:
-                        waktu = random.uniform(0.05,1.25)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
-                    if letak_gerakan >= 15:
-                        waktu = random.uniform(0.05,2.25)
-                        print('delay', waktu,' detik')
-                        time.sleep( waktu )
-                warna_kotak(driver, terbaik)
-                gerakan_otomatis(driver)
-                ambil_promosi(driver, terbaik)
-                
+                    if movement_location <= 15:
+                        delay_time = random.uniform(0.05,1.25)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
+                    if movement_location >= 15:
+                        delay_time = random.uniform(0.05,2.25)
+                        print('Waiting: ', delay_time,'seconds')
+                        time.sleep( delay_time )
+                colour_box(driver, best_move)
+                engine_movement(driver)
+                ambil_promosi(driver, best_move)
+
     except:
         return
 
-#cari warna
-def cari_warna(driver, otomatis_main):
-    global total_cari_lawan, jika_menang
+### TODO: Refactor this:
+#Search by colour:
+def search_colour(driver, automation_main):
+    global total_opponents_found, total_wins
     while (1):
         try:
-            if otomatis_main:
+            if automation_main:
                 try:
-                    cek = driver.find_element_by_class_name("game-over-dialog-content")
-                    print("Mengecek pertandingan apakah telah berakhir")
-                    if cek:
+                    check = driver.find_element_by_class_name("game-over-dialog-content")
+                    print("Checking if the match is over:")
+                    if check:
                         try:
-                            sudah = driver.find_element_by_class_name("game-over-button-seeking")
-                            print("Menunggu lawan")
+                            game_finished = driver.find_element_by_class_name("game-over-button-seeking")
+                            print("Waiting for an opponent...")
                         except:
                             time.sleep(2)
                             try:
                                 rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").text
                                 if rematch != 'Rematch':
                                     sebelumnya_kalah = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[1]/h3").text
-                                    if "You Won" in sebelumnya_kalah: 
-                                        if "win 0" not in jika_menang: 
-                                            #ini untuk acc rematch yang pemain setara
+                                    if "You Won" in sebelumnya_kalah:
+                                        if "win 0" not in total_wins:
+                                            #Accept rematch if both players are equal:
                                             rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[2]").click()
-                                            print("Acc rematch karena pemain setara")
-                                        else: 
-                                            #ini untuk tolak rematch pemain cupu
+                                            print("Aceepting rematch because we are equal opponents.")
+                                        else:
+                                            #Reject rematch because players aren't equal:
                                             rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
-                                            print("Menolak rematch karena pemain cupu")
+                                            print("Rejecting rematch because we are not equal opponents.")
                                     else:
                                         rematch = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
-                                        print("Menolak rematch karena pemain terlalu pro")
+                                        print("Rejecting rematch because our opponent is too strong.")
                             except:
                                 time.sleep(2)
-                                baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
-                                if baru:
-                                    print("Mencoba mencari pertandingan baru")
+                                find_new_game = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                                if find_new_game:
+                                    print("Trying to find a new game...")
                             try:
-                                permainan_baru = driver.find_element_by_class_name("game-over-button-button").click()
-                                print("Mencoba mencari pertandingan baru")
+                                new_game = driver.find_element_by_class_name("game-over-button-button").click()
+                                print("Trying to find a new game...")
                             except:
                                 try:
                                     time.sleep(1)
@@ -255,75 +233,77 @@ def cari_warna(driver, otomatis_main):
                                     pass
                 except:
                     try:
-                        cek = driver.find_element_by_class_name("quick-challenge-play").click()
-                        print("Membuat tantangan pertandingan baru")
+                        check = driver.find_element_by_class_name("quick-challenge-play").click()
+                        print("Trying to find a new game...")
                     except:
                         pass
             element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'draw-button-component')))
             break
         except TimeoutException:
-            print("Menunggu pertandingan dimulai ",total_cari_lawan)
-            total_cari_lawan += 1
-            if(total_cari_lawan > 8):
-                total_cari_lawan = 0
+            print("Waiting for match: ",total_opponents_found," to start.")
+            total_opponents_found += 1
+            if(total_opponents_found > 8):
+                total_opponents_found = 0
                 try:
-                    baru = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
-                    if baru:
-                        print("Mencoba mencari pertandingan baru")
+                    find_new_game = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/div[2]/div/div[4]/button[1]").click()
+                    if find_new_game:
+                        print("Trying to find a new game...")
                 except:
                     pass
                 driver.get("https://www.chess.com/live")
 
-    komponen = driver.find_elements_by_class_name("chat-message-component")
+    component = driver.find_elements_by_class_name("chat-message-component")
     try:
-        if('warn-message-component' in komponen[-1].get_attribute('class')):
-            warna_mentah = komponen[-2]
+        if('warn-message-component' in component[-1].get_attribute('class')):
+            colour_mentah = component[-2]
         else:
-            warna_mentah = komponen[-1]
-        jika_menang = warna_mentah.text
-        print(warna_mentah.text)
+            colour_mentah = component[-1]
+        total_wins = colour_mentah.text
+        print(colour_mentah.text)
     except:
         return
-    warna_pengguna = re.findall(r'(\w+)\s\(\d+\)', warna_mentah.text)
+    colour_user = re.findall(r'(\w+)\s\(\d+\)', colour_mentah.text)
 
-    cek_putih = warna_pengguna[0]
+    white_check = colour_user[0]
 
-    global pengguna
+    global user
     global mode
-    print('mode kecepatan permainan: ' + mode)
-    if cek_putih == pengguna:
-        print(pengguna + ' bermain sebagai putih')
-        return "putih"
+    print('Selected game mode is: ' + mode)
+    if white_check == user:
+        print(user + ' is playing as white.')
+        return "white"
     else:
-        print(pengguna + ' bermain sebagai hitam')
-        return "hitam"
+        print(user + ' is playing as black')
+        return "black"
 
-#suggest warna
-def warna_kotak(driver, terbaik):
-    kotak_awal = str(terbaik)[:2]
-    kotak_tujuan = str(terbaik)[2:]
-    lokasi_awal = str(0) + str(ord(kotak_awal[0])-96) + str(0) + kotak_awal[1]
-    lokasi_tujuan = str(0) + str(ord(kotak_tujuan[0])-96) + str(0) + kotak_tujuan[1]
+#Move for current colour:
+def colour_box(driver, best_move):
+    #Highlight piece boxes:
+    box_start_pos = str(best_move)[:2]
+    box_dest_pos = str(best_move)[2:]
+    #Piece movement:
+    location_start = str(0) + str(ord(box_start_pos[0])-96) + str(0) + box_start_pos[1]
+    location_dest = str(0) + str(ord(box_dest_pos[0])-96) + str(0) + box_dest_pos[1]
     driver.execute_script("""
     element = document.createElement('div');
     element.setAttribute("id", "highlight1");
     style1 = "background-color: rgb(255,0,0); opacity: 0.5;"
-    class1 = "square square-{lokasi_awal} marked-square"
+    class1 = "square square-{location_start} marked-square"
     element.setAttribute("style", style1)
     element.setAttribute("class", class1)
     document.getElementById("game-board").appendChild(element)
     element = document.createElement('div');
     element.setAttribute("id", "highlight2");
     style2 = "background-color: rgb(0,255,255); opacity: 0.5;"
-    class2 = "square square-{lokasi_tujuan} marked-square"
+    class2 = "square square-{location_dest} marked-square"
     element.setAttribute("style", style2)
     element.setAttribute("class", class2)
     document.getElementById("game-board").appendChild(element)
-    """.format(lokasi_awal = lokasi_awal, lokasi_tujuan = lokasi_tujuan))
-    
-#gerakan otomatis
-def gerakan_otomatis(driver):
+    """.format(location_start = location_start, location_dest = location_dest))
+
+#Do engine's movement:
+def engine_movement(driver):
     element = driver.find_element(By.XPATH, '//*[@id="highlight1"]')
     ActionChains(driver).move_to_element_with_offset(element, 0, 2).click().perform()
     time.sleep(0.05)
@@ -331,40 +311,39 @@ def gerakan_otomatis(driver):
     ActionChains(driver).move_to_element_with_offset(element, 0, 2).click().perform()
     return
 
-#buat pengaturan 
-def set_pengaturan():
+#Write config:
+def set_config():
     pengaturan = ConfigParser()
     pengaturan['DEFAULT'] = {'depth': '7',
                          'autoStart': '0'}
     with open('config.ini', 'w') as f:
         pengaturan.write(f)
 
-#buka pengaturan
-def buka_pengaturan():
+#Open config:
+def get_config():
     pengaturan = ConfigParser()
     pengaturan.read('config.ini')
     depth = int(pengaturan['DEFAULT']['depth'])
-    otomatis_main = int(pengaturan['DEFAULT']['autoStart'])
-    return depth, otomatis_main
+    automation_main = int(pengaturan['DEFAULT']['autoStart'])
+    return depth, automation_main
 
-#fungsi main
+#Play game:
 def main():
-    driver = buka_selenium()
-    pengguna, kata_sandi = Kredensial()
-    masuk(driver, pengguna, kata_sandi)
-    engine = chess.engine.SimpleEngine.popen_uci(lokasi_stockfish)
-    main_lagi = 1
-    depth, otomatis_main = buka_pengaturan()
-    while main_lagi:
+    driver = open_selenium()
+    user, password = credentials()
+    enter(driver, user, password)
+    engine = chess.engine.SimpleEngine.popen_uci(stockfish_location)
+    play_again = 1
+    depth, automation_main = get_config()
+    while play_again:
         skip_aborted()
-        warna = cari_warna(driver, otomatis_main)
-        main_game(driver, engine, otomatis_main, depth, warna)
-        if otomatis_main:
-            main_lagi = 1
+        colour = search_colour(driver, automation_main)
+        main_game(driver, engine, automation_main, depth, colour)
+        if automation_main:
+            play_again = 1
         else:
-            masukan = input("Ketik 'start' untuk lanjut suggest (ketika pertandingan sudah dimulai), atau ketik 'no' untuk keluar: ")
-            if masukan == 'no':
-                main_lagi = 0
+            print("Press enter once a new game has started for the engine to start playing.")
+            input("Or press CTRL+C to quit.")
     driver.close()
     engine.close()
 

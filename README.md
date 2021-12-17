@@ -1,5 +1,8 @@
 # Bot Auto Chess.com
-Is a suggestion for chess moves on the chess.com platform. The available features are: chess suggestions and moves automatically.
+An automated bot for chess moves on the [chess.com](https://www.chess.com/) platform.
+
+# THIS SCRIPT VIOLATES FAIR PLAY GUIDELINES OF CHESS.COM
+## USE THIS SCRIPT AT YOUR OWN DISCRESSION
 
 ## installation (Windows)
 
@@ -21,13 +24,12 @@ To use this script you will need a browser [Mozilla Firefox](https://www.mozilla
 Create an account on chess.com, by registering mode **beginner**. <br />
 It is recommended to create a username with 5 words and 2 numbers, for example: abcde11 <br />
 Confirm registration email.
-2. Enter Credentials <br />
-Open the file C:\Users\USERNAMEWINDOWS\Desktop\Catur\akun.txt <br />
+2. Enter credentials <br />
+Open the file C:\Users\USERNAMEWINDOWS\Desktop\Catur\account.txt <br />
 Change your username and password credentials.
 ## Start
-Open CMD (Administrator mode recommended), then run the command: <br />
+Open CMD (Administrator mode recommended), `cd` to Catur's directory and then run the command: <br />
 ```
-cd C:\Users\USERNAMEWINDOWS\Desktop\Catur
 python catur.py
 ```
 The script will automatically open Mozilla Firefox and automatically login based on existing credentials. <br />
@@ -58,6 +60,3 @@ This script is made from libraries and fixes existing scripts. In developing thi
 1. [StockFish](https://stockfishchess.org/download/)
 2. [ChessBot Linux](https://github.com/kraten/chessbot)
 3. VIP-Spuc3ngine
-
-## Disclaimer
-This is purely for educational purposes, I am not responsible for misuse of the script.
