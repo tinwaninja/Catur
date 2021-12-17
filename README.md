@@ -1,8 +1,7 @@
 # Bot Auto Chess.com
 An automated bot for chess moves on the [chess.com](https://www.chess.com/) platform.
 
-# THIS SCRIPT VIOLATES FAIR PLAY GUIDELINES OF CHESS.COM
-## USE THIS SCRIPT AT YOUR OWN DISCRESSION
+# THIS SCRIPT VIOLATES FAIR PLAY GUIDELINES OF CHESS.COM! USE THIS SCRIPT AT YOUR OWN DISCRETION
 
 ## installation (Windows)
 
@@ -12,7 +11,6 @@ To check that Python has been successfully installed, open CMD and type "python"
 2. Clone Repository <br />
 Install [Git](https://git-scm.com/download/win) in Windows, then run the command below:
 ```
-cd C:\Users\USERNAMEWINDOWS\Desktop
 git clone https://github.com/tinwaninja/Catur.git
 cd Catur
 pip install -r requirements.txt
@@ -25,7 +23,7 @@ Create an account on chess.com, by registering mode **beginner**. <br />
 It is recommended to create a username with 5 words and 2 numbers, for example: abcde11 <br />
 Confirm registration email.
 2. Enter credentials <br />
-Open the file C:\Users\USERNAMEWINDOWS\Desktop\Catur\account.txt <br />
+Open the file {folder directory}\Catur\account.txt <br />
 Change your username and password credentials.
 ## Start
 Open CMD (Administrator mode recommended), `cd` to Catur's directory and then run the command: <br />
